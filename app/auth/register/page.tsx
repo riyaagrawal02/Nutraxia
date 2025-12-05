@@ -35,14 +35,14 @@ export default function Register() {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-teal-100 via-white to-sky-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 flex items-center justify-center px-4">
       
-      {/* Theme Toggle */}
+      
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
 
       <div className="max-w-5xl w-full flex flex-col md:flex-row items-center gap-10">
         
-        {/* Left Branding */}
+        
         <div className="hidden md:flex flex-1 flex-col gap-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 dark:bg-white/5 backdrop-blur-md border border-white/50 dark:border-white/10 w-fit text-xs">
             <span className="font-medium tracking-wide text-gray-700 dark:text-gray-200">
@@ -83,7 +83,7 @@ export default function Register() {
           </div>
         </div>
 
-        {/* Right Register Card */}
+       
         <div className="flex-1 max-w-md">
           <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-xl rounded-3xl px-8 py-8 md:py-10">
 
@@ -97,7 +97,6 @@ export default function Register() {
               </p>
             </div>
 
-            {/* Form */}
             <div className="flex flex-col gap-4">
               <Input label="Full Name" name="name" onChange={handleChange} />
               <Input label="Email" name="email" onChange={handleChange} />
