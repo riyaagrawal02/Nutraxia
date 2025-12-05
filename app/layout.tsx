@@ -25,9 +25,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-gray-50 dark:bg-[#020617] text-gray-900 dark:text-gray-100 transition-colors">
+      <body className="transition-colors duration-300">
         <AppThemeProvider>
-          {children}
+          <div className="min-h-screen bg-gray-50 dark:bg-[#020617] text-gray-900 dark:text-gray-100">
+            {children}
+          </div>
         </AppThemeProvider>
       </body>
     </html>

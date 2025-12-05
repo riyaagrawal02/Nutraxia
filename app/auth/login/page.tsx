@@ -18,7 +18,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-linear-to-br from-teal-100 via-white to-sky-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 flex items-center justify-center px-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-teal-100 via-white to-sky-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 flex items-center justify-center px-4">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
@@ -26,7 +26,6 @@ export default function Login() {
       <div className="max-w-5xl w-full flex flex-col md:flex-row items-center gap-10">
         <div className="hidden md:flex flex-1 flex-col gap-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 dark:bg-white/5 backdrop-blur-md border border-white/50 dark:border-white/10 w-fit text-xs">
-            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
             <span className="font-medium tracking-wide text-gray-700 dark:text-gray-200">
               Nutraxia · AI Health Companion
             </span>
@@ -34,7 +33,7 @@ export default function Login() {
 
           <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-gray-900 dark:text-gray-50">
             Welcome back to{" "}
-            <span className="bg-linear-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-500 to-cyan-500 bg-clip-text text-transparent">
               Nutraxia
             </span>
           </h1>
