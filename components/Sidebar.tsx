@@ -11,8 +11,6 @@ import {
   Dumbbell
 } from "lucide-react";
 
-import ThemeToggle from "@/components/ThemeToggle";
-
 const links = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Health Profile", href: "/profile", icon: Activity },
