@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, ChangeEvent } from "react";
-import Input from "@/app/components/Input";
-import Button from "@/app/components/Button";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
 import Link from "next/link";
-import ThemeToggle from "@/app/components/ThemeToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Register() {
   const [data, setData] = useState({

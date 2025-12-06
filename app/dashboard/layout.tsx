@@ -1,5 +1,5 @@
-import Sidebar from "@/app/components/Sidebar";
-import ThemeToggle from "@/app/components/ThemeToggle";
+import Sidebar from "@/components/Sidebar";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function DashboardLayout({
   children,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, ChangeEvent } from "react";
-import ThemeToggle from "@/app/components/ThemeToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Profile() {
   const [data, setData] = useState({
