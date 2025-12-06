@@ -16,7 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Nutraxia",
   description: "AI-powered health & wellness assistant",
+  icons:{
+    icon:"/nutraxia.png",
+  },
 };
+
 
 export default function RootLayout({
   children,
