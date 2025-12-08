@@ -15,6 +15,7 @@ type ProfileData = {
 type Errors = Partial<Record<keyof ProfileData, string>>;
 
 export default function Profile() {
+  
   const [data, setData] = useState<ProfileData>({
     age: "",
     gender: "",
@@ -27,7 +28,7 @@ export default function Profile() {
   const [errors, setErrors] = useState<Errors>({});
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-  const [loading, setLoading] = useState(true);   // initial skeleton
+  const [loading, setLoading] = useState(true);   
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   useEffect(() => {
@@ -208,7 +209,6 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen w-full bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 px-4 py-10">
-      {/* Top bar */}
       <div className="flex justify-between items-center max-w-4xl mx-auto mb-8">
         <div>
           <h1 className="text-3xl font-bold">Health Profile</h1>

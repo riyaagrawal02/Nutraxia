@@ -3,12 +3,17 @@ export interface IUser extends Document{
     name:string;
     email:string;
     password:string;
+    emailVerified:Boolean,
+    verificationToken: string,
+
 }
 
 const UserSchema: Schema<IUser>= new Schema({
     name:{type:String},
     email:{type:String, unique:true},
     password:{type:String},
+    emailVerified: { type: Boolean, default: false },
+    verificationToken: String,
 },
     {timestamps:true}
 );

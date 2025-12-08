@@ -4,6 +4,7 @@ import { useState, ChangeEvent } from "react";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Register() {
@@ -18,19 +19,22 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-        try{
-            const res= await fetch("/api/register",{
-                method: 'POST',
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify(data),
-            });
-            const result= await res.json();
-            console.log(result);
-        }
-        catch(error){
-            console.log(error);
-        }
-  };
+  const res = await fetch("/api/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const json = await res.json();
+
+  if (json.success) {
+    alert("Account created!");
+    window.location.href = "/auth/login";
+  } else {
+    alert(json.error || "Registration failed");
+  }
+};
+
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-teal-100 via-white to-sky-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 flex items-center justify-center px-4">
@@ -113,6 +117,10 @@ export default function Register() {
                   Log in
                 </Link>
               </div>
+              <button
+                onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-300 dark:border-slate-700 text-sm hover:bg-gray-100 dark:hover:bg-slate-800">
+                <img src="/google_icon.png" className="h-4 w-4" />Continue with Google</button>
             </div>
 
           </div>

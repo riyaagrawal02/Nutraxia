@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import {
   Activity,
@@ -77,6 +78,12 @@ export default function Sidebar({
               );
             })}
           </div>
+          <button
+      onClick={() => signOut({ callbackUrl: "/auth/login" })}
+      className="text-xs px-3 py-2 my-5 rounded-full border border-gray-300 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-800"
+    >
+      Logout
+    </button>
 
 
           <p className="mt-auto text-xs text-slate-500">

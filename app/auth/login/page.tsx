@@ -4,6 +4,7 @@ import { useState, ChangeEvent } from "react";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Login() {
@@ -14,8 +15,19 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
-    console.log(data);
-  };
+  const res = await signIn("credentials", {
+    email: data.email,
+    password: data.password,
+    redirect: false,
+  });
+
+  if (!res?.error) {
+    window.location.href = "/dashboard";
+  } else {
+    alert("Invalid credentials");
+  }
+};
+
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-teal-100 via-white to-sky-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 flex items-center justify-center px-4">
@@ -101,6 +113,13 @@ export default function Login() {
                   Sign up
                 </Link>
               </div>
+              <button
+  onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+  className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-300 dark:border-slate-700 text-sm hover:bg-gray-100 dark:hover:bg-slate-800"
+>
+  <img src="/google_icon.png" className="h-4 w-4" />
+  Continue with Google
+</button>
             </div>
           </div>
         </div>
