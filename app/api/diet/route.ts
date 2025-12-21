@@ -2,19 +2,12 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import UserProfile from "@/models/UserProfile";
 import DietPlan from "@/models/DietPlan";
-import { DeepSeek } from "deepseek";
-
-const client = new DeepSeek({
-  apiKey: process.env.DEEPSEEK_API_KEY!,
-});
-
 
 export async function POST() {
   try {
     await connectDB();
 
     const profile = await UserProfile.findOne({ userId: "demo-user" });
-
     if (!profile) {
       return NextResponse.json(
         { error: "Profile incomplete" },
@@ -24,12 +17,11 @@ export async function POST() {
 
     const { age, gender, height, weight, activity, goal } = profile;
 
-    
     const h = Number(height);
     const w = Number(weight);
     const a = Number(age);
 
-    let BMR =
+    const BMR =
       gender === "Male"
         ? 88.36 + 13.4 * w + 4.8 * h - 5.7 * a
         : 447.6 + 9.2 * w + 3.1 * h - 4.3 * a;
@@ -50,38 +42,46 @@ export async function POST() {
     if (goal === "Weight Gain") targetCalories += 300;
     if (goal === "Build Muscle") targetCalories += 200;
 
-    
     const prompt = `
-You are a certified nutritionist. Create a **detailed 7-day Indian diet plan** for a user with:
+You are a certified nutritionist. Create a detailed 7-day Indian diet plan.
 
+User:
 Age: ${age}
 Gender: ${gender}
 Height: ${height} cm
 Weight: ${weight} kg
-Activity Level: ${activity}
+Activity: ${activity}
 Goal: ${goal}
 
-Daily calorie target: ~${targetCalories} kcal.
+Daily Calories: ~${targetCalories} kcal
 
-REQUIREMENTS:
-- Include breakfast, lunch, snacks, dinner for each day.
-- Use Indian foods (paneer, dal, roti, vegetables, oats, poha, fruits, etc.).
-- Give calories per meal.
-- Keep the tone friendly & clear.
-- End with "Shopping List" for the whole week.
-- Do NOT include anything medically risky. Keep safe & practical.
-
-Return in clean, readable text format.
+Rules:
+- Indian meals only
+- Breakfast, Lunch, Snacks, Dinner
+- Calories per meal
+- Safe & practical
+- End with weekly shopping list
 `;
 
-    const aiResponse = await client.chat.completions.create({
-      model: "deepseek-chat",
-      messages: [{ role: "user", content: prompt }],
-    });
+    const aiResponse = await fetch(
+      "https://api.deepseek.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "deepseek-chat",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+        }),
+      }
+    );
 
-    const dietText = aiResponse.choices[0].message.content;
+    const aiData = await aiResponse.json();
+    const dietText = aiData.choices[0].message.content;
 
-    
     const savedPlan = await DietPlan.findOneAndUpdate(
       { userId: "demo-user" },
       {
