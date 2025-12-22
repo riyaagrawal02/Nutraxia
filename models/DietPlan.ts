@@ -3,13 +3,13 @@ import { Schema, model, models } from "mongoose";
 const DietPlanSchema = new Schema(
   {
     userId: { type: String, required: true },
-    planId: String,
+    date: { type: String, required: true }, 
     calories: Number,
-    maintenanceCalories: Number,
-    goal: String,
-    content: String,
+    planText: String, 
   },
   { timestamps: true }
 );
+
+DietPlanSchema.index({ userId: 1, date: 1 }, { unique: true });
 
 export default models.DietPlan || model("DietPlan", DietPlanSchema);

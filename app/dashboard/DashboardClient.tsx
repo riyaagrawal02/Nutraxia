@@ -25,6 +25,9 @@ export default function DashboardClient({ userName }: { userName: string }) {
   const [todoTitle, setTodoTitle] = useState("");
   const [todoTime, setTodoTime] = useState("");
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
+  const [aiSummary, setAiSummary] = useState("");
+  const [aiLoading, setAiLoading] = useState(true);
+
 
   const fetchWeekly = async () => {
     const res = await fetch("/api/dashboard/weekly");
@@ -45,10 +48,20 @@ export default function DashboardClient({ userName }: { userName: string }) {
     setStats(json.stats);
   };
 
+  const fetchAISummary = async () => {
+    setAiLoading(true);
+    const res = await fetch("/api/ai/daily-summary");
+    const json = await res.json();
+    setAiSummary(json.summary);
+    setAiLoading(false);
+  };
+
+
   useEffect(() => {
     fetchDashboard();
     fetchTodos();
     fetchWeekly();
+    fetchAISummary();
   }, []);
 
   return (
@@ -93,6 +106,24 @@ export default function DashboardClient({ userName }: { userName: string }) {
             <p className="text-xs text-gray-500 dark:text-gray-400">Today · Overview</p>
             <h2 className="text-2xl font-semibold">Welcome back, {userName} 💚</h2>
           </div>
+
+          <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-900/20 p-4">
+            <p className="text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-300 mb-1">
+              AI Daily Insight
+            </p>
+
+            {aiLoading ? (
+              <div className="space-y-2">
+                <div className="h-3 bg-emerald-200/60 rounded animate-pulse" />
+                <div className="h-3 bg-emerald-200/60 rounded animate-pulse w-4/5" />
+              </div>
+            ) : (
+              <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
+                {aiSummary}
+              </p>
+            )}
+          </div>
+
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard title="Steps" value={stats.steps} change="Today" />
