@@ -3,47 +3,67 @@
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Menu } from "lucide-react";
+import { Menu, RefreshCcw } from "lucide-react";
 
 const PRESET_PLANS = [
   {
     title: "Weight Loss",
-    desc: "Low-calorie, balanced diet focused on fat loss",
-    prompt: "Generate a simple Indian weight loss diet",
+    desc: "Low-calorie balanced diet focused on fat loss",
+    prompt: "Generate a simple Indian weight loss diet plan",
   },
   {
     title: "Weight Gain",
     desc: "Calorie surplus diet for healthy weight gain",
-    prompt: "Generate a high-calorie diet for weight gain",
+    prompt: "Generate a high-calorie Indian diet for weight gain",
   },
   {
     title: "Muscle Building",
-    desc: "High-protein diet for gym and strength training",
+    desc: "High-protein diet for gym & strength training",
     prompt: "Generate a high-protein muscle building diet",
   },
   {
     title: "General Wellness",
-    desc: "Balanced diet for overall health and energy",
-    prompt: "Generate a balanced daily diet for good health",
+    desc: "Balanced diet for energy and overall health",
+    prompt: "Generate a balanced daily Indian diet for wellness",
   },
 ];
 
 export default function DietPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [dietPlan, setDietPlan] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+
+  const [diet, setDiet] = useState<any>(null);
   const [customPrompt, setCustomPrompt] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
 
-  const generateDiet = async (prompt?: string) => {
+ 
+  const fetchDiet = async () => {
     setLoading(true);
+    try {
+      const res = await fetch("/api/diet");
+      const json = await res.json();
+      setDiet(json.plan);
+    } catch {
+      setError("Failed to load diet plan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDiet();
+  }, []);
+
+  const generateDiet = async (prompt?: string) => {
+    setGenerating(true);
     setError("");
 
     try {
-      const res = await fetch("/api/ai/diet-plan", {
+      const res = await fetch("/api/diet/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customPrompt: prompt || customPrompt }),
+        body: JSON.stringify({ customPrompt: prompt }),
       });
 
       const json = await res.json();
@@ -53,11 +73,11 @@ export default function DietPage() {
         return;
       }
 
-      setDietPlan(json.plan);
+      setDiet(json.plan);
     } catch {
-      setError("Failed to generate diet plan.");
+      setError("AI diet generation failed. Please try again.");
     } finally {
-      setLoading(false);
+      setGenerating(false);
     }
   };
 
@@ -66,7 +86,7 @@ export default function DietPage() {
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100">
-        {/* Header */}
+        
         <header className="border-b bg-white/70 dark:bg-slate-950/70 backdrop-blur sticky top-0 z-30">
           <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -84,65 +104,82 @@ export default function DietPage() {
 
         <main className="max-w-4xl mx-auto px-4 py-8 space-y-10">
 
-          {/* PRESETS */}
+          
           <section>
             <h2 className="text-xl font-semibold mb-4">
               Choose a starting plan
             </h2>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {PRESET_PLANS.map((plan) => (
                 <button
                   key={plan.title}
                   onClick={() => generateDiet(plan.prompt)}
+                  disabled={generating}
                   className="p-5 rounded-2xl bg-white dark:bg-slate-900 border text-left hover:border-emerald-400 transition"
                 >
                   <p className="font-medium">{plan.title}</p>
-                  <p className="text-sm text-gray-500 mt-1">{plan.desc}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {plan.desc}
+                  </p>
                 </button>
               ))}
             </div>
           </section>
 
-          {/* CUSTOM PROMPT */}
+         
           <section>
             <h2 className="text-xl font-semibold mb-3">
-              Generate your own diet plan
+              Generate a custom diet plan
             </h2>
 
             <textarea
               value={customPrompt}
               onChange={(e) => setCustomPrompt(e.target.value)}
-              placeholder="Example: I want a vegetarian weight loss diet suitable for hostel life..."
-              className="w-full min-h-[100px] p-4 rounded-xl border bg-white dark:bg-slate-900 text-sm"
+              placeholder="Example: Vegetarian weight loss diet suitable for hostel life"
+              className="w-full min-h-[110px] p-4 rounded-xl border bg-white dark:bg-slate-900 text-sm"
             />
 
             <button
-              onClick={() => generateDiet()}
-              disabled={loading}
-              className="mt-3 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
+              onClick={() => generateDiet(customPrompt)}
+              disabled={generating || !customPrompt}
+              className="mt-3 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-60"
             >
-              Generate AI Diet Plan
+              {generating ? "Generating..." : "Generate AI Diet Plan"}
             </button>
           </section>
 
-          {/* RESULT */}
+          
           {loading && (
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 animate-pulse h-48" />
           )}
 
+         
           {error && (
-            <div className="p-4 rounded-xl bg-red-50 text-red-600">
+            <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/30 text-red-600 text-sm">
               {error}
             </div>
           )}
 
-          {dietPlan && (
-            <section className="p-6 rounded-2xl bg-white dark:bg-slate-900 border">
-              <p className="text-xs uppercase font-semibold text-emerald-600 mb-3">
-                Your AI Diet Plan
-              </p>
+          
+          {diet && (
+            <section className="p-6 rounded-2xl bg-white dark:bg-slate-900 border space-y-3">
+              <div className="flex justify-between items-center">
+                <p className="text-xs uppercase font-semibold text-emerald-600">
+                  Today’s AI Diet Plan
+                </p>
+                <button
+                  onClick={() => generateDiet()}
+                  disabled={generating}
+                  className="flex items-center gap-1 text-xs text-emerald-600 hover:underline"
+                >
+                  <RefreshCcw size={14} />
+                  Regenerate
+                </button>
+              </div>
+
               <pre className="whitespace-pre-wrap text-sm leading-relaxed">
-                {dietPlan.planText}
+                {diet.planText}
               </pre>
             </section>
           )}
