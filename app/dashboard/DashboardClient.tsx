@@ -1,5 +1,12 @@
 "use client";
-
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
@@ -17,6 +24,13 @@ export default function DashboardClient({ userName }: { userName: string }) {
   const [todos, setTodos] = useState<any[]>([]);
   const [todoTitle, setTodoTitle] = useState("");
   const [todoTime, setTodoTime] = useState("");
+  const [weeklyData, setWeeklyData] = useState<any[]>([]);
+
+  const fetchWeekly = async () => {
+    const res = await fetch("/api/dashboard/weekly");
+    const json = await res.json();
+    setWeeklyData(json.data);
+  };
 
   const fetchTodos = async () => {
     const res = await fetch("/api/todos");
@@ -34,6 +48,7 @@ export default function DashboardClient({ userName }: { userName: string }) {
   useEffect(() => {
     fetchDashboard();
     fetchTodos();
+    fetchWeekly();
   }, []);
 
   return (
@@ -119,11 +134,43 @@ export default function DashboardClient({ userName }: { userName: string }) {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800">
-              <h3 className="text-sm font-semibold mb-2">Weekly Trends</h3>
-              <div className="h-56 rounded-xl bg-gradient-to-br from-emerald-50 to-sky-50 dark:from-slate-800 dark:to-slate-900 border border-dashed flex justify-center items-center text-xs text-gray-500 dark:text-gray-400">
-                Graph placeholder
-              </div>
+              <h3 className="text-sm font-semibold mb-4">Weekly Trends</h3>
+
+              {weeklyData.length === 0 ? (
+                <div className="h-56 flex items-center justify-center text-xs text-gray-500">
+                  No data yet
+                </div>
+              ) : (
+                <div className="h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={weeklyData}>
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="steps"
+                        stroke="#10b981"
+                        strokeWidth={2}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="water"
+                        stroke="#06b6d4"
+                        strokeWidth={2}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="sleep"
+                        stroke="#6366f1"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
+
 
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 space-y-4">
 
