@@ -2,6 +2,7 @@
 
 import { useState, useEffect, ChangeEvent } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
+import Sidebar from "@/components/Sidebar";
 
 type ProfileData = {
   age: string;
@@ -208,6 +209,10 @@ export default function Profile() {
   }
 
   return (
+
+    <>
+    
+    
     <div className="min-h-screen w-full bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 px-4 py-10">
       <div className="flex justify-between items-center max-w-4xl mx-auto mb-8">
         <div>
@@ -380,6 +385,7 @@ export default function Profile() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
