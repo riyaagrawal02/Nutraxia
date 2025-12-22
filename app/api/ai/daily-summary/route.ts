@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectDB from "@/lib/mongodb";
 import { generateAISummary } from "@/lib/ai";
-
+import { calculateProfileCompletion } from "@/lib/profileCompletion";
 import UserProfile from "@/models/UserProfile";
 import DailyLog from "@/models/DailyLog";
 import DailyAISummary from "@/models/DailyAISummary";
@@ -57,6 +57,15 @@ export async function GET() {
     const profile = await UserProfile.findOne({
       userId: session.user.id,
     });
+    const completion = calculateProfileCompletion(profile);
+
+if (completion < 70) {
+  return NextResponse.json({
+    error: "Profile incomplete",
+    required: 70,
+    current: completion,
+  });
+}
 
     const log = await DailyLog.findOne({
       userId: session.user.id,
