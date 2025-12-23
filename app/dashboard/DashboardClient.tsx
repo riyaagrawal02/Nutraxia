@@ -166,7 +166,31 @@ export default function DashboardClient({ userName }: { userName: string }) {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard title="Steps" value={stats.steps} change="Today" />
+            <StatCard
+              title="Steps"
+              value={stats.steps}
+              change={
+                <button
+                  onClick={async () => {
+                    const steps = prompt("Enter steps walked today:");
+                    if (!steps) return;
+
+                    await fetch("/api/log/steps", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ steps: Number(steps) }),
+                    });
+
+                    fetchDashboard();
+                    fetchWeekly();
+                  }}
+                  className="text-xs text-emerald-600 hover:underline"
+                >
+                  + Log Steps
+                </button>
+              }
+            />
+
             <StatCard
               title="Water"
               value={`${stats.water} L`}
@@ -199,7 +223,31 @@ export default function DashboardClient({ userName }: { userName: string }) {
               }
             />
 
-            <StatCard title="Sleep" value={`${stats.sleep} h`} change="Last night" />
+            <StatCard
+              title="Sleep"
+              value={`${stats.sleep} h`}
+              change={
+                <button
+                  onClick={async () => {
+                    const sleepFrom = prompt("Sleep time (HH:MM, 24h)");
+                    const wakeAt = prompt("Wake time (HH:MM, 24h)");
+                    if (!sleepFrom || !wakeAt) return;
+
+                    await fetch("/api/log/sleep", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ sleepFrom, wakeAt }),
+                    });
+
+                    fetchDashboard();
+                    fetchWeekly();
+                  }}
+                  className="text-xs text-emerald-600 hover:underline"
+                >
+                  + Log Sleep
+                </button>
+              }
+            />
 
           </div>
 
