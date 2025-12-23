@@ -33,8 +33,6 @@ export async function PATCH(
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
-
-
 export async function DELETE(
   req: Request,
   context: { params: Promise<{ id: string }> }
