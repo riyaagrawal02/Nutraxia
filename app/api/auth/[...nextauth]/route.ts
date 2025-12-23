@@ -27,15 +27,19 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.id = (user as any).id;
-      return token;
-    },
-    async session({ session, token }) {
-      if (token) (session.user as any).id = token.id;
-      return session;
-    },
+  async jwt({ token, user }) {
+    if (user) {
+      token.sub = (user as any).id; // Mongo _id ONLY
+    }
+    return token;
   },
+
+  async session({ session, token }) {
+    session.user.id = token.sub!;
+    return session;
+  },
+},
+
   pages: {
     signIn: "/auth/login",
   },

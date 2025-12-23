@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectDB from "@/lib/mongodb";
 import DailyLog from "@/models/DailyLog";
-import Todo from "@/models/ToDos";
+import Todo from "@/models/Todo";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
