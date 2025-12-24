@@ -16,6 +16,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 export default function DashboardClient({ userName }: { userName: string }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(0);
+  
 
   const [stats, setStats] = useState({
     steps: 0,
@@ -319,69 +320,60 @@ export default function DashboardClient({ userName }: { userName: string }) {
               </div>
             </div>
 
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 space-y-5">
 
 
-            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 space-y-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-sm font-semibold">Today’s Routine</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Keep track of meds, workouts & habits
-                  </p>
-                </div>
+              <div>
+                <h3 className="text-sm font-semibold">Today’s Routine</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Habits, workouts & medications
+                </p>
               </div>
 
-              <div className="flex justify-center flex-wrap  gap-2">
+
+              <div className="flex flex-wrap gap-2">
                 <input
                   value={todoTitle}
                   onChange={(e) => setTodoTitle(e.target.value)}
-                  placeholder="e.g. Morning meds"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && todoTitle) {
-                      document.getElementById("addRoutineBtn")?.click();
-                    }
-                  }}
+                  placeholder="e.g. Morning workout"
                   className="flex-1 px-3 py-2 rounded-xl text-sm bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-400 outline-none"
                 />
-
                 <input
                   type="time"
                   value={todoTime}
                   onChange={(e) => setTodoTime(e.target.value)}
-                  className="px-2 rounded-xl text-sm bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-400 outline-none"
+                  className="px-3 py-2 rounded-xl text-sm bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700"
                 />
-
                 <button
-                  id="addRoutineBtn"
                   disabled={!todoTitle}
                   onClick={async () => {
                     await fetch("/api/todos", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ title: todoTitle, time: todoTime }),
+                      body: JSON.stringify({
+                        title: todoTitle,
+                        time: todoTime,
+                      }),
                     });
                     setTodoTitle("");
                     setTodoTime("");
                     fetchTodos();
                   }}
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-medium transition"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-medium"
                 >
                   Add
                 </button>
               </div>
-
               {todos.length === 0 && (
-                <div className="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
-                  No routines yet. Start by adding one 👆
-                </div>
+                <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-4">
+                  No routines yet. Add one above 👆
+                </p>
               )}
-
-
               <div className="space-y-2">
                 {todos.map((todo) => (
                   <div
                     key={todo._id}
-                    className="flex justify-between items-center p-3 rounded-xl bg-gray-50 dark:bg-slate-800 transition hover:shadow-sm"
+                    className="flex justify-between items-center p-3 rounded-xl bg-gray-50 dark:bg-slate-800"
                   >
                     <div>
                       <p
@@ -397,36 +389,24 @@ export default function DashboardClient({ userName }: { userName: string }) {
                         </p>
                       )}
                     </div>
-
-                    <div className="flex items-center gap-2">
+                    <div className="flex gap-2">
                       {!todo.completed && (
                         <button
                           onClick={async () => {
-                            console.log("SENDING ID:", todo._id);
-
-                            const res = await fetch(`/api/todos/${todo._id}`, { method: "PATCH" });
-                            if (!res.ok) {
-                              const err = await res.text();
-                              console.error("Todo update failed:", err);
-                              alert("Failed to update routine. Check console.");
-                              return;
-                            }
-
+                            await fetch(`/api/todos/${todo._id}`, { method: "PATCH" });
                             fetchTodos();
                           }}
-                          className="px-2 py-1 rounded-lg text-xs bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:opacity-80"
+                          className="px-2 py-1 rounded-lg text-xs bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
                         >
                           Done
                         </button>
                       )}
-
                       <button
                         onClick={async () => {
                           await fetch(`/api/todos/${todo._id}`, { method: "DELETE" });
                           fetchTodos();
-                          console.log(todo._id);
                         }}
-                        className="px-2 py-1 rounded-lg text-xs bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300 hover:opacity-80"
+                        className="px-2 py-1 rounded-lg text-xs bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300"
                       >
                         Delete
                       </button>

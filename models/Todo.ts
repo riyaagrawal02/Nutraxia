@@ -2,11 +2,15 @@ import { Schema, model, models } from "mongoose";
 
 const TodoSchema = new Schema(
   {
-    userId: String,
-    title: String,
-    time: String,
+    userId: { type: String, required: true },
+
+    title: { type: String, required: true },
+
+    time: { type: String },
+
     completed: { type: Boolean, default: false },
-    date: String, // YYYY-MM-DD
+
+    date: { type: String }, // YYYY-MM-DD
   },
   { timestamps: true }
 );

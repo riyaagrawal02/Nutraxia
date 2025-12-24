@@ -37,6 +37,7 @@ export async function POST(req: Request) {
     userId: session.user.id,
     title: body.title,
     time: body.time || "",
+    type: body.type || "habit",
     date: new Date().toISOString().slice(0, 10),
   });
 
