@@ -21,7 +21,7 @@ export default function SettingsPage() {
     weeklyReport: false,
   });
 
-  /* ---------------- API ---------------- */
+
 
   const fetchSettings = async () => {
     const res = await fetch("/api/settings");
@@ -43,7 +43,7 @@ export default function SettingsPage() {
     fetchSettings();
   }, []);
 
-  /* ---------------- UI ---------------- */
+  
 
   return (
     <>
@@ -65,7 +65,7 @@ export default function SettingsPage() {
 
         <main className="max-w-3xl mx-auto px-4 py-8 space-y-10">
 
-          {/* Preferences */}
+          
           <Section title="Preferences">
             <ToggleRow
               label="Reminders"
@@ -92,7 +92,6 @@ export default function SettingsPage() {
             />
           </Section>
 
-          {/* Account */}
           <Section title="Account">
             <Row
               label="Logout"
@@ -102,7 +101,7 @@ export default function SettingsPage() {
             />
           </Section>
 
-          {/* Danger */}
+          
           <Section title="Danger Zone">
             <Row
               label="Delete Account"
@@ -119,7 +118,7 @@ export default function SettingsPage() {
   );
 }
 
-/* ----------------- UI HELPERS ----------------- */
+
 
 function Section({
   title,
