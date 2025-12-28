@@ -1,24 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Menu, LogOut, ChevronRight, Trash2 } from "lucide-react";
+import { Menu, LogOut, Trash2 } from "lucide-react";
 import { signOut } from "next-auth/react";
+
+type Settings = {
+  remindersEnabled: boolean;
+  aiEnabled: boolean;
+  weeklyReport: boolean;
+};
 
 export default function SettingsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [remindersEnabled, setRemindersEnabled] = useState(true);
-  const [aiEnabled, setAiEnabled] = useState(true);
-  const [weeklyReport, setWeeklyReport] = useState(false);
+  const [settings, setSettings] = useState<Settings>({
+    remindersEnabled: true,
+    aiEnabled: true,
+    weeklyReport: false,
+  });
+
+  /* ---------------- API ---------------- */
+
+  const fetchSettings = async () => {
+    const res = await fetch("/api/settings");
+    const json = await res.json();
+    setSettings(json.settings);
+  };
+
+  const updateSettings = async (updates: Partial<Settings>) => {
+    setSettings((prev) => ({ ...prev, ...updates }));
+
+    await fetch("/api/settings", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+  };
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  /* ---------------- UI ---------------- */
 
   return (
     <>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
-        
         <header className="border-b bg-white/70 dark:bg-slate-950/70 backdrop-blur sticky top-0 z-30">
           <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
             <button
@@ -34,14 +65,35 @@ export default function SettingsPage() {
 
         <main className="max-w-3xl mx-auto px-4 py-8 space-y-10">
 
-          
-          <Section title="Account">
-            <Row
-              label="Edit Profile"
-              action="Open"
-              onClick={() => (window.location.href = "/profile")}
+          {/* Preferences */}
+          <Section title="Preferences">
+            <ToggleRow
+              label="Reminders"
+              checked={settings.remindersEnabled}
+              onChange={(checked) =>
+                updateSettings({ remindersEnabled: checked })
+              }
             />
 
+            <ToggleRow
+              label="AI Insights"
+              checked={settings.aiEnabled}
+              onChange={(checked) =>
+                updateSettings({ aiEnabled: checked })
+              }
+            />
+
+            <ToggleRow
+              label="Weekly Health Report"
+              checked={settings.weeklyReport}
+              onChange={(checked) =>
+                updateSettings({ weeklyReport: checked })
+              }
+            />
+          </Section>
+
+          {/* Account */}
+          <Section title="Account">
             <Row
               label="Logout"
               icon={<LogOut size={16} />}
@@ -50,58 +102,8 @@ export default function SettingsPage() {
             />
           </Section>
 
-        
-          <Section title="Appearance">
-            <div className="flex justify-between items-center p-4 rounded-xl bg-white dark:bg-slate-900 border">
-              <p className="text-sm font-medium">Theme</p>
-              <ThemeToggle />
-            </div>
-          </Section>
-
-          <Section title="Preferences">
-            <ToggleRow
-              label="Reminders"
-              checked={remindersEnabled}
-              onChange={setRemindersEnabled}
-            />
-
-            <ToggleRow
-              label="AI Insights"
-              checked={aiEnabled}
-              onChange={setAiEnabled}
-            />
-
-            <ToggleRow
-              label="Weekly Health Report"
-              checked={weeklyReport}
-              onChange={setWeeklyReport}
-            />
-          </Section>
-
-          
-          <Section title="Security">
-            <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border">
-              <p className="text-xs text-gray-500">Email</p>
-              <p className="text-sm font-medium truncate">
-                user@email.com
-              </p>
-            </div>
-
-            <Row
-              label="Change Password"
-              action="Coming soon"
-            />
-          </Section>
-
-         
+          {/* Danger */}
           <Section title="Danger Zone">
-            <Row
-              label="Clear All Data"
-              icon={<Trash2 size={16} />}
-              danger
-              onClick={() => alert("API coming soon")}
-            />
-
             <Row
               label="Delete Account"
               icon={<Trash2 size={16} />}
@@ -111,13 +113,13 @@ export default function SettingsPage() {
               }
             />
           </Section>
-
         </main>
       </div>
     </>
   );
 }
 
+/* ----------------- UI HELPERS ----------------- */
 
 function Section({
   title,
@@ -128,7 +130,7 @@ function Section({
 }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-xs uppercase font-semibold text-gray-500 dark:text-gray-400">
+      <h2 className="text-xs uppercase font-semibold text-gray-500">
         {title}
       </h2>
       <div className="space-y-2">{children}</div>
@@ -138,13 +140,11 @@ function Section({
 
 function Row({
   label,
-  action,
   onClick,
   icon,
   danger,
 }: {
   label: string;
-  action?: string;
   onClick?: () => void;
   icon?: React.ReactNode;
   danger?: boolean;
@@ -160,19 +160,10 @@ function Row({
     >
       <div className="flex items-center gap-2">
         {icon}
-        <p
-          className={`text-sm font-medium ${
-            danger ? "text-red-600" : ""
-          }`}
-        >
+        <p className={`text-sm font-medium ${danger ? "text-red-600" : ""}`}>
           {label}
         </p>
       </div>
-      {action ? (
-        <span className="text-xs text-gray-500">{action}</span>
-      ) : (
-        <ChevronRight size={16} />
-      )}
     </button>
   );
 }
