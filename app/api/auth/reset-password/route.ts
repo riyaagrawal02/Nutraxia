@@ -14,7 +14,6 @@ export async function POST(req: Request) {
     if (!record || record.expiresAt < new Date()) {
       return NextResponse.json({ error: "Token expired or invalid" }, { status: 400 });
     }
-
     const hashed = await bcrypt.hash(password, 10);
 
     await User.findByIdAndUpdate(record.userId, { password: hashed });

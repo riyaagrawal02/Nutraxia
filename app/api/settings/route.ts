@@ -4,13 +4,11 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectDB from "@/lib/mongodb";
 import UserSettings from "@/models/UserSettings";
 
-
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   await connectDB();
 
   let settings = await UserSettings.findOne({
@@ -26,7 +24,6 @@ export async function GET() {
 
   return NextResponse.json({ settings });
 }
-
 
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);

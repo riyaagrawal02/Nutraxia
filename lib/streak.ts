@@ -1,7 +1,6 @@
 export function calculateWorkoutStreak(dates: Date[]) {
   if (dates.length === 0) return 0;
 
-
   const days = Array.from(
     new Set(dates.map(d => d.toISOString().slice(0, 10)))
   ).sort().reverse();

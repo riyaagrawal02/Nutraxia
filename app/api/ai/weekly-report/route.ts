@@ -24,9 +24,7 @@ export async function GET() {
   }
 
   await connectDB();
-
   const { start, end } = getWeekRange();
-
  
   const cached = await WeeklyAIReport.findOne({
     userId: session.user.id,
@@ -47,8 +45,6 @@ export async function GET() {
       report: "Log your daily activities to receive weekly AI insights.",
     });
   }
-
- 
   const summaryData = logs
     .map(
       (d) =>
@@ -67,7 +63,6 @@ Generate a weekly health report:
 - No medical advice
 - Max 5 bullet points
 `;
-
   const aiSummary = await generateAISummary(prompt);
   await WeeklyAIReport.create({
     userId: session.user.id,

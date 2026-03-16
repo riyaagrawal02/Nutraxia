@@ -21,8 +21,6 @@ export default function SettingsPage() {
     weeklyReport: false,
   });
 
-
-
   const fetchSettings = async () => {
     const res = await fetch("/api/settings");
     const json = await res.json();
@@ -43,8 +41,6 @@ export default function SettingsPage() {
     fetchSettings();
   }, []);
 
-  
-
   return (
     <>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -64,8 +60,6 @@ export default function SettingsPage() {
         </header>
 
         <main className="max-w-3xl mx-auto px-4 py-8 space-y-10">
-
-          
           <Section title="Preferences">
             <ToggleRow
               label="Reminders"
@@ -117,8 +111,6 @@ export default function SettingsPage() {
     </>
   );
 }
-
-
 
 function Section({
   title,

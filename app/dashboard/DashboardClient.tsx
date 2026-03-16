@@ -12,12 +12,9 @@ import { Menu } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 
-
 export default function DashboardClient({ userName }: { userName: string }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(0);
-  
-
   const [stats, setStats] = useState({
     steps: 0,
     water: 0,
@@ -265,7 +262,7 @@ export default function DashboardClient({ userName }: { userName: string }) {
                   </div>
                 ) : (
                   <div className="h-56">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={200}>
                       <LineChart data={weeklyData}>
                         <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                         <YAxis />
@@ -294,7 +291,7 @@ export default function DashboardClient({ userName }: { userName: string }) {
                   </div>
                 ) : (
                   <div className="h-56">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={200}>
                       <LineChart data={weeklyData}>
                         <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                         <YAxis />

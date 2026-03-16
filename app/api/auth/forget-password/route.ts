@@ -4,7 +4,6 @@ import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
 import PasswordResetToken from "@/models/PasswordResetToken";
 
-
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
