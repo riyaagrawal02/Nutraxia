@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Workout from "@/models/Workout";
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-
-    const workout = await Workout.findById(params.id);
+    const { id } = await params;
+    const workout = await Workout.findById(id);
 
     if (!workout) {
       return NextResponse.json({ error: "Workout not found" }, { status: 404 });
@@ -26,12 +26,13 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
-    await Workout.findByIdAndDelete(params.id);
+    const { id } = await params;
+    await Workout.findByIdAndDelete(id);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("DELETE ERROR:", err);

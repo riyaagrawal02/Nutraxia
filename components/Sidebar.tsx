@@ -32,15 +32,12 @@ export default function Sidebar({
 
   return (
     <>
-      
       <div
         onClick={onClose}
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-all duration-300 ${
           open ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
       />
-
-      
       <div
         className={`fixed top-0 left-0 h-full w-64 bg-slate-900 text-white border-r border-slate-800 z-50 transition-transform duration-300 ${
           open ? "translate-x-0" : "-translate-x-64"
@@ -54,8 +51,6 @@ export default function Sidebar({
               Nutraxia
             </h2>
           </div>
-
-         
           <div className="flex flex-col gap-2">
             {links.map((item) => {
               const Icon = item.icon;
@@ -84,8 +79,6 @@ export default function Sidebar({
     >
       Logout
     </button>
-
-
           <p className="mt-auto text-xs text-slate-500">
             © {new Date().getFullYear()} Nutraxia
           </p>
