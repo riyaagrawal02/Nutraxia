@@ -1,4 +1,14 @@
-export function calculateProfileCompletion(profile: any) {
+type ProfileInput = {
+  age?: string;
+  gender?: string;
+  height?: string;
+  weight?: string;
+  activity?: string;
+  goal?: string;
+  avatarUrl?: string;
+} | null;
+
+export function calculateProfileCompletion(profile: ProfileInput) {
   if (!profile) return 0;
 
   const fields = [

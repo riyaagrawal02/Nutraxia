@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectDB from "@/lib/mongodb";
 import DailyLog from "@/models/DailyLog";
+import HealthMetric from "@/models/HealthMetric";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -21,7 +22,13 @@ export async function POST(req: Request) {
   await DailyLog.findOneAndUpdate(
     { userId: session.user.id, date: today },
     { $set: { steps } },
-    { upsert: true }
+    { upsert: true },
+  );
+
+  await HealthMetric.findOneAndUpdate(
+    { userId: session.user.id, date: today },
+    { $set: { steps } },
+    { upsert: true },
   );
 
   return NextResponse.json({ success: true });

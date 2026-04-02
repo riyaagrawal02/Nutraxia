@@ -3,12 +3,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectDB from "@/lib/mongodb";
 import DailyLog from "@/models/DailyLog";
+import HealthMetric from "@/models/HealthMetric";
 
 function calcSleepHours(start: string, end: string) {
   const [sh, sm] = start.split(":").map(Number);
   const [eh, em] = end.split(":").map(Number);
 
-  let startMin = sh * 60 + sm;
+  const startMin = sh * 60 + sm;
   let endMin = eh * 60 + em;
 
   if (endMin < startMin) endMin += 24 * 60; // crossed midnight
@@ -31,7 +32,13 @@ export async function POST(req: Request) {
   await DailyLog.findOneAndUpdate(
     { userId: session.user.id, date: today },
     { $set: { sleep } },
-    { upsert: true }
+    { upsert: true },
+  );
+
+  await HealthMetric.findOneAndUpdate(
+    { userId: session.user.id, date: today },
+    { $set: { sleepHours: sleep } },
+    { upsert: true },
   );
 
   return NextResponse.json({ success: true, sleep });

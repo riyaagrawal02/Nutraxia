@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 import {
   LineChart,
   Line,
@@ -12,28 +13,129 @@ import { Menu } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 
+type Stats = {
+  steps: number;
+  water: number;
+  meals: number;
+  sleep: number;
+};
+
+type HealthPoint = {
+  date: string;
+  calories: number;
+  weight: number | null;
+  water: number;
+  sleepHours: number;
+  steps: number;
+  workoutMinutes: number;
+  healthScore: number;
+};
+
+type HabitSummary = {
+  habitId: string;
+  title: string;
+  completionRate: number;
+  completedCount: number;
+  scheduledCount: number;
+  streak: number;
+};
+
+type HabitItem = {
+  habit: {
+    _id: string;
+    title: string;
+    difficulty: string;
+    scheduleDays: number[];
+  };
+  stats: {
+    streak: number;
+    completionRate: number;
+    completedCount: number;
+    scheduledCount: number;
+  };
+};
+
+type HeatmapDay = { date: string; count: number };
+
+type ReportSummary = {
+  periodStart: string;
+  periodEnd: string;
+  habitCompletionPct: number;
+  workoutHours: number;
+  caloriesTotal: number;
+  weightChange: number | null;
+  healthScoreAvg: number;
+  consistencyScore: number;
+};
+
+const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+
 export default function DashboardClient({ userName }: { userName: string }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(0);
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<Stats>({
     steps: 0,
     water: 0,
     meals: 0,
     sleep: 0,
   });
 
-  const [todos, setTodos] = useState<any[]>([]);
+  const [todos, setTodos] = useState<
+    Array<{
+      _id: string;
+      title: string;
+      time?: string;
+      completed: boolean;
+    }>
+  >([]);
   const [todoTitle, setTodoTitle] = useState("");
   const [todoTime, setTodoTime] = useState("");
-  const [weeklyData, setWeeklyData] = useState<any[]>([]);
   const [aiSummary, setAiSummary] = useState("");
   const [aiLoading, setAiLoading] = useState(true);
 
+  const [healthSeries, setHealthSeries] = useState<HealthPoint[]>([]);
+  const [habitCompletion, setHabitCompletion] = useState<HabitSummary[]>([]);
+  const [workoutStreak, setWorkoutStreak] = useState(0);
+  const [weeklyReport, setWeeklyReport] = useState<ReportSummary | null>(null);
+  const [monthlyReport, setMonthlyReport] = useState<ReportSummary | null>(null);
+  const [habits, setHabits] = useState<HabitItem[]>([]);
+  const [heatmapDays, setHeatmapDays] = useState<HeatmapDay[]>([]);
 
-  const fetchWeekly = async () => {
-    const res = await fetch("/api/dashboard/weekly");
+  const [habitTitle, setHabitTitle] = useState("");
+  const [habitDifficulty, setHabitDifficulty] = useState("easy");
+  const [habitDays, setHabitDays] = useState<number[]>([1, 3, 5]);
+
+
+  const fetchAnalytics = async () => {
+    const res = await fetch("/api/analytics/dashboard?days=30");
     const json = await res.json();
-    setWeeklyData(json.data);
+    setHealthSeries(json.healthSeries || []);
+    setHabitCompletion(json.habitCompletion || []);
+    setWorkoutStreak(json.workoutStreak || 0);
+  };
+
+  const fetchReports = async () => {
+    const [weeklyRes, monthlyRes] = await Promise.all([
+      fetch("/api/reports/weekly"),
+      fetch("/api/reports/monthly"),
+    ]);
+
+    const weeklyJson = await weeklyRes.json();
+    const monthlyJson = await monthlyRes.json();
+    setWeeklyReport(weeklyJson.report?.summary || null);
+    setMonthlyReport(monthlyJson.report?.summary || null);
+  };
+
+  const fetchHabits = async () => {
+    const res = await fetch("/api/habits");
+    const json = await res.json();
+    setHabits(json.data || []);
+  };
+
+  const fetchHeatmap = async () => {
+    const res = await fetch("/api/habits/heatmap");
+    const json = await res.json();
+    setHeatmapDays(json.days || []);
   };
 
   const fetchTodos = async () => {
@@ -66,10 +168,41 @@ export default function DashboardClient({ userName }: { userName: string }) {
   useEffect(() => {
     fetchDashboard();
     fetchTodos();
-    fetchWeekly();
     fetchAISummary();
     fetchProfileCompletion();
+    fetchAnalytics();
+    fetchReports();
+    fetchHabits();
+    fetchHeatmap();
   }, []);
+
+  const chartSeries = healthSeries.map((point) => ({
+    date: point.date.slice(5),
+    steps: point.steps,
+    water: Number((point.water / 1000).toFixed(2)),
+    sleep: point.sleepHours,
+    healthScore: point.healthScore,
+    weight: point.weight,
+    calories: point.calories,
+  }));
+
+  const avgHabitCompletion = habitCompletion.length
+    ? Math.round(
+      (habitCompletion.reduce(
+        (sum, habit) => sum + habit.completionRate,
+        0,
+      ) /
+        habitCompletion.length) *
+      100,
+    )
+    : 0;
+
+  const getHeatColor = (count: number) => {
+    if (count >= 5) return "bg-emerald-600";
+    if (count >= 3) return "bg-emerald-400";
+    if (count >= 1) return "bg-emerald-200";
+    return "bg-gray-100 dark:bg-slate-800";
+  };
 
   return (
     <>
@@ -249,21 +382,34 @@ export default function DashboardClient({ userName }: { userName: string }) {
 
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <StatCard
+              title="Habit Consistency"
+              value={`${avgHabitCompletion}%`}
+              change={<span className="text-xs text-gray-500">30-day average</span>}
+            />
+            <StatCard
+              title="Workout Streak"
+              value={`${workoutStreak} days`}
+              change={<span className="text-xs text-gray-500">Current streak</span>}
+            />
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
             <div className="lg:col-span-2 space-y-4">
 
               <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800">
-                <h3 className="text-sm font-semibold mb-3">Weekly Steps</h3>
+                <h3 className="text-sm font-semibold mb-3">Steps & Health Score</h3>
 
-                {weeklyData.length === 0 ? (
+                {chartSeries.length === 0 ? (
                   <div className="h-48 flex items-center justify-center text-xs text-gray-500">
                     No data yet
                   </div>
                 ) : (
                   <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={200}>
-                      <LineChart data={weeklyData}>
+                      <LineChart data={chartSeries}>
                         <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                         <YAxis />
                         <Tooltip />
@@ -273,6 +419,13 @@ export default function DashboardClient({ userName }: { userName: string }) {
                           stroke="#10b981"
                           strokeWidth={3}
                           dot={{ r: 3 }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="healthScore"
+                          stroke="#f97316"
+                          strokeWidth={2}
+                          dot={{ r: 2 }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
@@ -285,14 +438,14 @@ export default function DashboardClient({ userName }: { userName: string }) {
                   Water & Sleep Balance
                 </h3>
 
-                {weeklyData.length === 0 ? (
+                {chartSeries.length === 0 ? (
                   <div className="h-48 flex items-center justify-center text-xs text-gray-500">
                     No data yet
                   </div>
                 ) : (
                   <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={200}>
-                      <LineChart data={weeklyData}>
+                      <LineChart data={chartSeries}>
                         <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                         <YAxis />
                         <Tooltip />
@@ -314,6 +467,14 @@ export default function DashboardClient({ userName }: { userName: string }) {
                     </ResponsiveContainer>
                   </div>
                 )}
+              </div>
+
+              <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800">
+                <h3 className="text-sm font-semibold mb-3">Reports</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <ReportCard title="Weekly" summary={weeklyReport} />
+                  <ReportCard title="Monthly" summary={monthlyReport} />
+                </div>
               </div>
             </div>
 
@@ -413,18 +574,209 @@ export default function DashboardClient({ userName }: { userName: string }) {
               </div>
             </div>
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold">Habits</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Create habits and log completions
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2">
+                <input
+                  value={habitTitle}
+                  onChange={(e) => setHabitTitle(e.target.value)}
+                  placeholder="e.g. Morning walk"
+                  className="px-3 py-2 rounded-xl text-sm bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-400 outline-none"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <select
+                    value={habitDifficulty}
+                    onChange={(e) => setHabitDifficulty(e.target.value)}
+                    className="px-3 py-2 rounded-xl text-sm bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700"
+                  >
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                  <div className="flex flex-wrap gap-2">
+                    {DAY_LABELS.map((label, index) => (
+                      <button
+                        key={label + index}
+                        type="button"
+                        onClick={() => {
+                          setHabitDays((prev) =>
+                            prev.includes(index)
+                              ? prev.filter((d) => d !== index)
+                              : [...prev, index]
+                          );
+                        }}
+                        className={`h-9 w-9 rounded-xl text-xs font-semibold border ${habitDays.includes(index)
+                            ? "bg-emerald-600 border-emerald-600 text-white"
+                            : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300"
+                          }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    disabled={!habitTitle}
+                    onClick={async () => {
+                      await fetch("/api/habits", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          title: habitTitle,
+                          difficulty: habitDifficulty,
+                          scheduleDays: habitDays.length ? habitDays : [0, 1, 2, 3, 4, 5, 6],
+                        }),
+                      });
+                      setHabitTitle("");
+                      setHabitDays([1, 3, 5]);
+                      setHabitDifficulty("easy");
+                      fetchHabits();
+                    }}
+                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-medium"
+                  >
+                    Add Habit
+                  </button>
+                </div>
+              </div>
+
+              {habits.length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  No habits yet. Create one above.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {habits.map((item) => (
+                    <div
+                      key={item.habit._id}
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 rounded-xl bg-gray-50 dark:bg-slate-800"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{item.habit.title}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Streak {item.stats.streak} · {Math.round(item.stats.completionRate * 100)}% completion
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={async () => {
+                            await fetch(`/api/habits/${item.habit._id}/logs`, {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({}),
+                            });
+                            fetchHabits();
+                            fetchHeatmap();
+                            fetchAnalytics();
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-xs bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                        >
+                          Log
+                        </button>
+                        <span className="text-xs px-2 py-1 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                          {item.habit.difficulty}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold">Habit Heatmap</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Last 12 months of completions
+                </p>
+              </div>
+
+              {heatmapDays.length === 0 ? (
+                <div className="h-40 flex items-center justify-center text-xs text-gray-500">
+                  No data yet
+                </div>
+              ) : (
+                <div className="grid grid-cols-14 gap-1">
+                  {heatmapDays.map((day) => (
+                    <div
+                      key={day.date}
+                      title={`${day.date} · ${day.count} completions`}
+                      className={`h-3 w-3 rounded-sm ${getHeatColor(day.count)}`}
+                    />
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span>Low</span>
+                <span className="h-3 w-3 rounded-sm bg-gray-100 dark:bg-slate-800" />
+                <span className="h-3 w-3 rounded-sm bg-emerald-200" />
+                <span className="h-3 w-3 rounded-sm bg-emerald-400" />
+                <span className="h-3 w-3 rounded-sm bg-emerald-600" />
+                <span>High</span>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </>
   );
 }
 
-function StatCard({ title, value, change }: any) {
+function StatCard({
+  title,
+  value,
+  change,
+}: {
+  title: string;
+  value: React.ReactNode;
+  change?: React.ReactNode;
+}) {
   return (
     <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800">
       <p className="text-xs text-gray-500 dark:text-gray-400">{title}</p>
       <h3 className="text-2xl font-semibold">{value}</h3>
       <div className="mt-1">{change}</div>
+    </div>
+  );
+}
+
+function ReportCard({
+  title,
+  summary,
+}: {
+  title: string;
+  summary: ReportSummary | null;
+}) {
+  if (!summary) {
+    return (
+      <div className="rounded-xl border border-dashed border-gray-200 dark:border-slate-700 p-3 text-xs text-gray-500">
+        {title} report pending
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-gray-200 dark:border-slate-800 p-3 bg-gray-50 dark:bg-slate-800">
+      <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">
+        {title} Report
+      </p>
+      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-300">
+        <span>Habits</span>
+        <span>{summary.habitCompletionPct}%</span>
+        <span>Workout hrs</span>
+        <span>{summary.workoutHours}</span>
+        <span>Calories</span>
+        <span>{summary.caloriesTotal}</span>
+        <span>Health score</span>
+        <span>{summary.healthScoreAvg}</span>
+      </div>
     </div>
   );
 }

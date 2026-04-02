@@ -7,8 +7,10 @@ const TodoSchema = new Schema(
     time: String,
     date: { type: String, required: true }, // YYYY-MM-DD
     completed: { type: Boolean, default: false },
+    type: { type: String, default: "habit" },
+    habitId: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default models.Todo || model("Todo", TodoSchema);

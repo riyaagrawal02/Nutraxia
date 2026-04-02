@@ -13,15 +13,16 @@ export async function GET() {
 
     await connectDB();
 
-    const workouts = await Workout.find({ userId: session.user.id })
-      .sort({ createdAt: -1 });
+    const workouts = await Workout.find({ userId: session.user.id }).sort({
+      createdAt: -1,
+    });
 
     return NextResponse.json({ workouts });
   } catch (err) {
     console.error("WORKOUT GET ERROR:", err);
     return NextResponse.json(
       { error: "Failed to fetch workouts" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -32,7 +33,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { title, plan, duration, source, scheduled } = await req.json();
+  const { title, plan, duration, source, scheduled, split, exercises } =
+    await req.json();
 
   await connectDB();
 
@@ -40,9 +42,11 @@ export async function POST(req: Request) {
     userId: session.user.id,
     title,
     plan,
+    split,
     duration,
     source,
     scheduled,
+    exercises: exercises || [],
     date: new Date().toISOString().slice(0, 10),
   });
 

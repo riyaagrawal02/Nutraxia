@@ -31,13 +31,14 @@ const PRESET_PLANS = [
 export default function DietPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [diet, setDiet] = useState<any>(null);
+  type DietPlan = { planText: string } | null;
+  const [diet, setDiet] = useState<DietPlan>(null);
   const [customPrompt, setCustomPrompt] = useState("");
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
 
- 
+
   const fetchDiet = async () => {
     setLoading(true);
     try {
@@ -86,7 +87,7 @@ export default function DietPage() {
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100">
-        
+
         <header className="border-b bg-white/70 dark:bg-slate-950/70 backdrop-blur sticky top-0 z-30">
           <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -104,7 +105,7 @@ export default function DietPage() {
 
         <main className="max-w-4xl mx-auto px-4 py-8 space-y-10">
 
-          
+
           <section>
             <h2 className="text-xl font-semibold mb-4">
               Choose a starting plan
@@ -127,7 +128,7 @@ export default function DietPage() {
             </div>
           </section>
 
-         
+
           <section>
             <h2 className="text-xl font-semibold mb-3">
               Generate a custom diet plan
@@ -149,19 +150,19 @@ export default function DietPage() {
             </button>
           </section>
 
-          
+
           {loading && (
             <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 animate-pulse h-48" />
           )}
 
-         
+
           {error && (
             <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/30 text-red-600 text-sm">
               {error}
             </div>
           )}
 
-          
+
           {diet && (
             <section className="p-6 rounded-2xl bg-white dark:bg-slate-900 border space-y-3">
               <div className="flex justify-between items-center">

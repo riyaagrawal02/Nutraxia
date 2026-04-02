@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
@@ -250,7 +251,7 @@ export default function WorkoutPage() {
                               method: "PATCH",
                             });
                             fetchWorkouts();
-                            fetchStreak(); 
+                            fetchStreak();
                           }}
                           className="px-3 py-1 rounded-lg text-xs bg-emerald-600 text-white hover:bg-emerald-700"
                         >

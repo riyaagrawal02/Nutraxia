@@ -17,10 +17,7 @@ export async function POST(req: Request) {
     const { prompt } = await req.json();
 
     if (!prompt || prompt.length < 10) {
-      return NextResponse.json(
-        { error: "Prompt too short" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Prompt too short" }, { status: 400 });
     }
 
     const systemPrompt = `
@@ -48,11 +45,14 @@ Rules:
       "Unable to generate workout plan.";
 
     return NextResponse.json({ plan });
-  } catch (err: any) {
-    console.error("Groq Workout Error:", err);
+  } catch (err: unknown) {
+    console.error(
+      "Groq Workout Error:",
+      err instanceof Error ? err.message : err,
+    );
     return NextResponse.json(
       { error: "AI generation failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

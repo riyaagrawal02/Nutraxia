@@ -5,13 +5,19 @@ import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
+type CredentialsInput = Record<"email" | "password", string> | undefined;
+type UserWithId = { id?: string };
+
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   providers: [
     CredentialsProvider({
       name: "credentials",
       credentials: {},
-      async authorize(credentials: any) {
+      async authorize(credentials: CredentialsInput) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
         const { email, password } = credentials;
         await connectDB();
         const user = await User.findOne({ email });
@@ -27,18 +33,19 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-  async jwt({ token, user }) {
-    if (user) {
-      token.sub = (user as any).id; // Mongo _id ONLY
-    }
-    return token;
-  },
+    async jwt({ token, user }) {
+      const userId = user ? (user as UserWithId).id : undefined;
+      if (userId) {
+        token.sub = String(userId);
+      }
+      return token;
+    },
 
-  async session({ session, token }) {
-    session.user.id = token.sub!;
-    return session;
+    async session({ session, token }) {
+      session.user.id = token.sub!;
+      return session;
+    },
   },
-},
 
   pages: {
     signIn: "/auth/login",

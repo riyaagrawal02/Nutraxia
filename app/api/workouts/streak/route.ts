@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectDB from "@/lib/mongodb";
-import Workout from "@/models/Workout";
+import WorkoutLog from "@/models/WorkoutLog";
 import { calculateWorkoutStreak } from "@/lib/streak";
 
 export async function GET() {
@@ -13,13 +13,12 @@ export async function GET() {
 
   await connectDB();
 
-  const completedWorkouts = await Workout.find({
+  const completedWorkouts = await WorkoutLog.find({
     userId: session.user.id,
-    completed: true,
-  }).select("completedAt");
+  }).select("date");
 
   const streak = calculateWorkoutStreak(
-    completedWorkouts.map(w => w.completedAt)
+    completedWorkouts.map((w) => new Date(w.date)),
   );
 
   return NextResponse.json({ streak });

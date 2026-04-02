@@ -8,28 +8,6 @@ import { generateAISummary } from "@/lib/ai";
 import UserProfile from "@/models/UserProfile";
 import DietPlan from "@/models/DietPlan";
 
-async function generateDietPlan(profile: any) {
-  const prompt = `
-User Profile:
-Age: ${profile.age}
-Gender: ${profile.gender}
-Height: ${profile.height} cm
-Weight: ${profile.weight} kg
-Activity Level: ${profile.activity}
-Goal: ${profile.goal}
-
-Create a simple daily diet plan:
-- Indian friendly foods
-- Mention daily calorie target
-- Breakfast, Lunch, Snack, Dinner
-- Keep it practical and affordable
-- No medical advice
-- Short and structured
-`;
-
-  return await generateAISummary(prompt);
-}
-
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -97,10 +75,11 @@ Instructions:
 
   try {
     planText = await generateAISummary(prompt);
-  } catch (err: any) {
-    console.error("Diet AI error:", err.message);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "AI generation failed";
+    console.error("Diet AI error:", message);
     return NextResponse.json({
-      error: err.message || "AI generation failed",
+      error: message,
     });
   }
 
@@ -111,7 +90,7 @@ Instructions:
       date: today,
       planText,
     },
-    { upsert: true, new: true }
+    { upsert: true, new: true },
   );
 
   return NextResponse.json({ plan });

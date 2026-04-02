@@ -8,7 +8,21 @@ import UserProfile from "@/models/UserProfile";
 import DailyLog from "@/models/DailyLog";
 import DailyAISummary from "@/models/DailyAISummary";
 
-async function generateSummary(profile: any, log: any) {
+type SummaryProfile = {
+  age?: string;
+  gender?: string;
+  goal?: string;
+  activity?: string;
+};
+
+type SummaryLog = {
+  steps?: number;
+  water?: number;
+  meals?: number;
+  sleep?: number;
+};
+
+async function generateSummary(profile: SummaryProfile, log: SummaryLog) {
   const prompt = `
 User Health Profile:
 Age: ${profile.age}
@@ -59,13 +73,13 @@ export async function GET() {
     });
     const completion = calculateProfileCompletion(profile);
 
-if (completion < 70) {
-  return NextResponse.json({
-    error: "Profile incomplete",
-    required: 70,
-    current: completion,
-  });
-}
+    if (completion < 70) {
+      return NextResponse.json({
+        error: "Profile incomplete",
+        required: 70,
+        current: completion,
+      });
+    }
 
     const log = await DailyLog.findOne({
       userId: session.user.id,
@@ -110,7 +124,7 @@ if (completion < 70) {
         summary:
           "Something went wrong while generating your daily insight. Please try again later.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

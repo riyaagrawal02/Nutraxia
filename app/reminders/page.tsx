@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
@@ -47,7 +48,7 @@ export default function RemindersPage() {
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
-       
+
         <header className="border-b bg-white/70 dark:bg-slate-950/70 backdrop-blur sticky top-0 z-30">
           <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
             <button
@@ -61,10 +62,10 @@ export default function RemindersPage() {
           </div>
         </header>
 
-       
+
         <main className="max-w-4xl mx-auto px-4 py-8 space-y-10">
 
-         
+
           <Section title="Today">
             {todayReminders.map((todo) => (
               <ReminderCard
@@ -78,7 +79,7 @@ export default function RemindersPage() {
             )}
           </Section>
 
-         
+
           <Section title="Upcoming">
             {upcomingReminders.map((todo) => (
               <ReminderCard
@@ -92,7 +93,7 @@ export default function RemindersPage() {
             )}
           </Section>
 
-         
+
           <Section title="Completed">
             {completedReminders.map((todo) => (
               <ReminderCard
@@ -149,9 +150,8 @@ function ReminderCard({
     <div className="flex justify-between items-center p-4 rounded-xl bg-white dark:bg-slate-900 border">
       <div>
         <p
-          className={`text-sm font-medium ${
-            todo.completed ? "line-through opacity-60" : ""
-          }`}
+          className={`text-sm font-medium ${todo.completed ? "line-through opacity-60" : ""
+            }`}
         >
           {todo.title}
         </p>

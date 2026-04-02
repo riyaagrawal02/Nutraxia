@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
@@ -95,7 +96,7 @@ export default function SettingsPage() {
             />
           </Section>
 
-          
+
           <Section title="Danger Zone">
             <Row
               label="Delete Account"
@@ -143,11 +144,10 @@ function Row({
   return (
     <button
       onClick={onClick}
-      className={`w-full flex justify-between items-center p-4 rounded-xl border bg-white dark:bg-slate-900 ${
-        danger
+      className={`w-full flex justify-between items-center p-4 rounded-xl border bg-white dark:bg-slate-900 ${danger
           ? "border-red-200 dark:border-red-900"
           : "border-gray-200 dark:border-slate-800"
-      }`}
+        }`}
     >
       <div className="flex items-center gap-2">
         {icon}

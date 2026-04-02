@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Nutraxia",
   description: "AI-powered health & wellness assistant",
-  icons:{
-    icon:"/nutraxia.png",
+  icons: {
+    icon: "/nutraxia.png",
   },
 };
 
@@ -30,13 +30,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="transition-colors duration-300">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} transition-colors duration-300`}
+      >
         <AppThemeProvider>
           <div className="min-h-screen bg-gray-50 dark:bg-[#020617] text-gray-900 dark:text-gray-100">
             {children}
           </div>
         </AppThemeProvider>
-        <Analytics/>
+        <Analytics />
       </body>
     </html>
   );

@@ -5,7 +5,10 @@ const WorkoutSchema = new Schema(
     userId: String,
     title: String,
     plan: String,
+    split: { type: String, default: "custom" },
     duration: Number,
+    caloriesBurned: { type: Number, default: 0 },
+    exercises: { type: Array, default: [] },
 
     source: {
       type: String,
@@ -20,7 +23,7 @@ const WorkoutSchema = new Schema(
 
     date: String, // YYYY-MM-DD (scheduled date)
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default models.Workout || model("Workout", WorkoutSchema);
