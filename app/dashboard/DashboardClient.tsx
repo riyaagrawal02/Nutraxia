@@ -151,6 +151,10 @@ export default function DashboardClient({ userName }: { userName: string }) {
     setStats(json.stats);
   };
 
+  const fetchWeekly = async () => {
+    await Promise.all([fetchAnalytics(), fetchReports()]);
+  };
+
   const fetchAISummary = async () => {
     setAiLoading(true);
     const res = await fetch("/api/ai/daily-summary");
@@ -614,8 +618,8 @@ export default function DashboardClient({ userName }: { userName: string }) {
                           );
                         }}
                         className={`h-9 w-9 rounded-xl text-xs font-semibold border ${habitDays.includes(index)
-                            ? "bg-emerald-600 border-emerald-600 text-white"
-                            : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300"
+                          ? "bg-emerald-600 border-emerald-600 text-white"
+                          : "bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-300"
                           }`}
                       >
                         {label}

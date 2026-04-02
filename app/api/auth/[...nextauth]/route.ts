@@ -5,7 +5,6 @@ import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
-type CredentialsInput = Record<"email" | "password", string> | undefined;
 type UserWithId = { id?: string };
 
 export const authOptions: NextAuthOptions = {
@@ -13,8 +12,11 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
-      credentials: {},
-      async authorize(credentials: CredentialsInput) {
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
